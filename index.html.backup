@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- 파비콘 설정 -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⏰</text></svg>">
+  <title>주간 강의 시간표</title>
+  <style>
+    @font-face {
+      font-family: 'Pretendard-Regular';
+      src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+    
+    @font-face {
+      font-family: 'Pretendard-Bold';
+      src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff') format('woff');
+      font-weight: 700;
+      font-style: normal;
+    }
+    
+    /* 기본 폰트 설정 */
+    * {
+      box-sizing: border-box;
+      font-family: 'Pretendard-Regular', 'Arial', sans-serif;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-weight: 400;
+      background-color: #f4f4f4;
+    }
+    
+    .schedule-container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      table-layout: fixed;
+    }
+    
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+      vertical-align: middle;
+      height: 60px;
+      transition: background-color 0.3s; /* 배경색 변화 효과 */
+    }
+    
+    th {
+      background-color: #3498db;
+      color: white;
+      height: 40px;
+      font-weight: bold;
+      border-bottom: 2px solid #2980b9; /* 현대적인 스타일을 위한 하단 테두리 */
+    }
+    
+    .time-col {
+      background-color: #f2f2f2;
+      width: 15%;
+    }
+    
+    .day-col {
+      width: 17%;
+    }
+    
+    .time-text {
+      font-size: 10px;
+      color: #777;
+      display: block;
+      margin-top: 3px;
+    }
+    
+    .class-info {
+      font-size: 13px;
+      line-height: 1.3;
+      padding: 4px 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .room-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 5px;
+    }
+    
+    .room-label {
+      font-size: 10px;
+      background-color: #e8f4fc;
+      color: #555;
+      border-radius: 12px;
+      display: inline-block;
+      padding: 2px 8px;
+      margin-right: 5px;
+      border: 1px solid #d0e3f2;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .course-details, .notice-container {
+      margin-top: 20px;
+      font-size: 12px;
+      line-height: 1.4;
+      border: 1px solid #ddd;
+      padding: 15px;
+      background-color: #f9f9f9;
+    }
+    
+    .course-details h3, .notice-container h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+    
+    .course-item {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+    
+    /* 교수별 색상 표시를 위한 스타일 */
+    .prof-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    
+    /* 교수별 색상 */
+    .prof-김경회 { background-color: #FF5733; }
+    .prof-김은태 { background-color: #33FF57; }
+    .prof-김용숙 { background-color: #3357FF; }
+    .prof-최유석 { background-color: #F033FF; }
+    .prof-박현수 { background-color: #FF9933; }
+    .prof-김정연 { background-color: #33FFF5; }
+    .prof-김민영 { background-color: #A833FF; }
+    .prof-none { background-color: #CCCCCC; }
+    
+    .professor-legend {
+      margin-top: 20px;
+      border-top: 1px solid #ddd;
+      padding-top: 15px;
+    }
+    
+    .legend-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .legend-item {
+      display: inline-block;
+      margin-right: 15px;
+      margin-bottom: 8px;
+    }
+    
+    /* 새로운 G 050 라벨 스타일 */
+    .group-label {
+      font-size: 10px;
+      background-color: #ffeedd;
+      color: #555;
+      border-radius: 12px;
+      display: inline-block;
+      padding: 2px 8px;
+      margin-left: 6px;
+      border: 1px solid #f8d7bc;
+      vertical-align: middle;
+    }
+    
+    /* 서비스인성 공지를 위한 스타일 */
+    .notice-container {
+      background-color: #fff8dc;
+      border: 1px solid #e6d5a7;
+    }
+    
+    .notice-container h4 {
+      color: #8b4513;
+      margin-top: 15px;
+      margin-bottom: 8px;
+    }
+    
+    .notice-container ul {
+      margin: 8px 0;
+      padding-left: 20px;
+    }
+    
+    .notice-container li {
+      margin-bottom: 5px;
+    }
+    
+    /* 반응형 디자인 */
+    @media (max-width: 768px) {
+      .schedule-container {
+        padding: 10px;
+      }
+      table {
+        font-size: 12px;
+      }
+      th, td {
+        padding: 8px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 24px;
+      }
+      table {
+        font-size: 10px;
+      }
+      th, td {
+        padding: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="schedule-container">
+    <h1>주간 강의 시간표</h1>
+    <table>
+      <thead>
+        <tr>
+          <th class="time-col" style="background-color: #3498db; color: white; border-bottom: 2px solid #2980b9;">교시</th>
+          <th class="day-col" style="background-color: #3498db; color: white; border-bottom: 2px solid #2980b9;">월</th>
+          <th class="day-col" style="background-color: #3498db; color: white; border-bottom: 2px solid #2980b9;">화</th>
+          <th class="day-col" style="background-color: #3498db; color: white; border-bottom: 2px solid #2980b9;">수</th>
+          <th class="day-col" style="background-color: #3498db; color: white; border-bottom: 2px solid #2980b9;">목</th>
+          <th class="day-col" style="background-color: #3498db; color: white; border-bottom: 2px solid #2980b9;">금</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom: none;">
+          <td class="time-col">
+            1교시
+            <span class="time-text">9:00~9:50</span>
+          </td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr style="border-bottom: none;">
+          <td class="time-col">
+            2교시
+            <span class="time-text">10:00~10:50</span>
+          </td>
+          <td></td>
+          <td>
+            <div class="class-info">
+              데이터베이스실무(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 전산712</div>
+              <span class="prof-indicator prof-김경회"></span>
+            </div>
+          </td>
+          <td>
+            <div class="class-info">
+              성서의지혜/관계의미학(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 미디610</div>
+              <span class="prof-indicator prof-김은태"></span>
+            </div>
+          </td>
+          <td>
+            <div class="class-info">
+              UI/UX실무(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 무선인터넷702</div>
+              <span class="prof-indicator prof-김용숙"></span>
+            </div>
+          </td>
+          <td>
+            <div class="class-info">
+              파이썬(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 전산712</div>
+              <span class="prof-indicator prof-김경회"></span>
+            </div>
+          </td>
+        </tr>
+        <tr style="border-bottom: none;">
+          <td class="time-col">
+            3교시
+            <span class="time-text">11:00~11:50</span>
+          </td>
+          <td></td>
+          <td>
+            <div class="class-info">
+              데이터베이스실무(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 전산712</div>
+              <span class="prof-indicator prof-김경회"></span>
+            </div>
+          </td>
+          <td>
+            <div class="class-info">
+              채플(A)
+              <span class="group-label">G 050</span>
+            </div>
+            <div class="room-container">
+              <div class="room-label">백석홀 백석홀(대)</div>
+              <span class="prof-indicator prof-최유석"></span>
+            </div>
+          </td>
+          <td>
+            <div class="class-info">
+              UI/UX실무(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 무선인터넷702</div>
+              <span class="prof-indicator prof-김용숙"></span>
+            </div>
+          </td>
+          <td>
+            <div class="class-info">
+              파이썬(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 전산712</div>
+              <span class="prof-indicator prof-김경회"></span>
+            </div>
+          </td>
+        </tr>
+        <tr style="border-bottom: none;">
+          <td class="time-col">
+            4교시
+            <span class="time-text">12:00~12:50</span>
+          </td>
+          <td></td>
+          <td>
+            <div class="class-info">
+              데이터베이스실무(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 전산712</div>
+              <span class="prof-indicator prof-김경회"></span>
+            </div>
+          </td>
+          <td></td>
+          <td>
+            <div class="class-info">
+              UI/UX실무(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 무선인터넷702</div>
+              <span class="prof-indicator prof-김용숙"></span>
+            </div>
+          </td>
+          <td>
+            <div class="class-info">
+              파이썬(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 전산712</div>
+              <span class="prof-indicator prof-김경회"></span>
+            </div>
+          </td>
+        </tr>
+        <tr style="border-bottom: none;">
+          <td class="time-col">
+            5교시
+            <span class="time-text">13:00~13:50</span>
+          </td>
+          <td></td>
+          <td></td>
+          <td>
+            <div class="class-info">
+              서비스인성(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 미디610</div>
+              <span class="prof-indicator prof-none"></span>
+            </div>
+          </td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr style="border-bottom: none;">
+          <td class="time-col">
+            6교시
+            <span class="time-text">14:00~14:50</span>
+          </td>
+          <td></td>
+          <td>
+            <div class="class-info">
+              자바기초(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 그래픽707</div>
+              <span class="prof-indicator prof-박현수"></span>
+            </div>
+          </td>
+          <td></td>
+          <td>
+            <div class="class-info">
+              하드웨어실습(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 OS706</div>
+              <span class="prof-indicator prof-김민영"></span>
+            </div>
+          </td>
+          <td></td>
+        </tr>
+        <tr style="border-bottom: none;">
+          <td class="time-col">
+            7교시
+            <span class="time-text">15:00~15:50</span>
+          </td>
+          <td></td>
+          <td>
+            <div class="class-info">
+              자바기초(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 그래픽707</div>
+              <span class="prof-indicator prof-박현수"></span>
+            </div>
+          </td>
+          <td>
+            <div class="class-info">
+              자기개발(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 미디610</div>
+              <span class="prof-indicator prof-김정연"></span>
+            </div>
+          </td>
+          <td>
+            <div class="class-info">
+              하드웨어실습(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 OS706</div>
+              <span class="prof-indicator prof-김민영"></span>
+            </div>
+          </td>
+          <td></td>
+        </tr>
+        <tr style="border-bottom: none;">
+          <td class="time-col">
+            8교시
+            <span class="time-text">16:00~16:50</span>
+          </td>
+          <td></td>
+          <td>
+            <div class="class-info">
+              자바기초(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 그래픽707</div>
+              <span class="prof-indicator prof-박현수"></span>
+            </div>
+          </td>
+          <td></td>
+          <td>
+            <div class="class-info">
+              하드웨어실습(A)
+            </div>
+            <div class="room-container">
+              <div class="room-label">창조관 OS706</div>
+              <span class="prof-indicator prof-김민영"></span>
+            </div>
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div class="notice-container">
+      <h3>서비스인성 관련 공지 정리</h3>
+      
+      <p><strong>수요일 5교시</strong>: 서비스인성 교과목 진행</p>
+      
+      <h4>다빈치아카데미 일정 (총 3회)</h4>
+      <ul>
+        <li><strong>날짜</strong>: 3/26, 4/2, 4/9</li>
+        <li><strong>장소</strong>: 백석홀 소강당</li>
+        <li><strong>시간</strong>: 13:30까지 도착</li>
+      </ul>
+      
+      <h4>서비스인성아카데미 일정 (총 6회)</h4>
+      <ul>
+        <li><strong>날짜</strong>: 4/23, 4/30, 5/7, 5/14, 5/21, 5/28</li>
+        <li><strong>장소</strong>: 창조관 610호</li>
+      </ul>
+    </div>
+    
+    <div class="course-details">
+      <h3>강의 상세 정보</h3>
+      
+      <div class="course-item">
+        <span class="prof-indicator prof-김경회"></span>
+        <span class="course-name">데이터베이스실무(A)</span> - 교수: 김경회
+      </div>
+      
+      <div class="course-item">
+        <span class="prof-indicator prof-김은태"></span>
+        <span class="course-name">성서의지혜.관계의미학(A)</span> - 교수: 김은태
+      </div>
+      
+      <div class="course-item">
+        <span class="prof-indicator prof-김용숙"></span>
+        <span class="course-name">UI/UX실무(A)</span> - 교수: 김용숙
+      </div>
+      
+      <div class="course-item">
+        <span class="prof-indicator prof-김경회"></span>
+        <span class="course-name">파이썬(A)</span> - 교수: 김경회
+      </div>
+      
+      <div class="course-item">
+        <span class="prof-indicator prof-최유석"></span>
+        <span class="course-name">채플(A)</span> - 교수: 최유석
+      </div>
+      
+      <div class="course-item">
+        <span class="prof-indicator prof-none"></span>
+        <span class="course-name">서비스인성(A)</span>
+      </div>
+      
+      <div class="course-item">
+        <span class="prof-indicator prof-박현수"></span>
+        <span class="course-name">자바기초(A)</span> - 교수: 박현수
+      </div>
+      
+      <div class="course-item">
+        <span class="prof-indicator prof-김정연"></span>
+        <span class="course-name">자기개발(A)</span> - 교수: 김정연
+      </div>
+      
+      <div class="course-item">
+        <span class="prof-indicator prof-김민영"></span>
+        <span class="course-name">하드웨어실습(A)</span> - 교수: 김민영
+      </div>
+      
+      <div class="professor-legend">
+        <div class="legend-title">교수별 색상 구분</div>
+        <div class="legend-item"><span class="prof-indicator prof-김경회"></span> 김경회</div>
+        <div class="legend-item"><span class="prof-indicator prof-김은태"></span> 김은태</div>
+        <div class="legend-item"><span class="prof-indicator prof-김용숙"></span> 김용숙</div>
+        <div class="legend-item"><span class="prof-indicator prof-최유석"></span> 최유석</div>
+        <div class="legend-item"><span class="prof-indicator prof-박현수"></span> 박현수</div>
+        <div class="legend-item"><span class="prof-indicator prof-김정연"></span> 김정연</div>
+        <div class="legend-item"><span class="prof-indicator prof-김민영"></span> 김민영</div>
+        <div class="legend-item"><span class="prof-indicator prof-none"></span> 미지정</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
